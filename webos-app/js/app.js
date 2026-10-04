@@ -68,6 +68,31 @@ class IPTVApp {
     if (fullscreenBtn) {
       fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
     }
+
+    // Sync UI when user presses Escape to exit fullscreen
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        this._applyFullscreenUI(false);
+      }
+    });
+
+    // Tap anywhere on video to show header again in fullscreen
+    document.getElementById('video-container').addEventListener('click', () => {
+      if (document.body.classList.contains('is-fullscreen')) {
+        const header = document.getElementById('header-bar');
+        if (header) {
+          header.style.opacity = '1';
+          header.style.pointerEvents = '';
+          clearTimeout(this._headerHideTimer);
+          this._headerHideTimer = setTimeout(() => {
+            if (document.body.classList.contains('is-fullscreen')) {
+              header.style.opacity = '0';
+              header.style.pointerEvents = 'none';
+            }
+          }, 3000);
+        }
+      }
+    });
     document.getElementById('modal-close-btn').addEventListener('click', () => this.closeSettings());
     document.getElementById('guide-backdrop').addEventListener('click', () => this.closeGuide());
 
@@ -342,10 +367,33 @@ class IPTVApp {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => {
         console.warn(`Error attempting to enable fullscreen: ${err.message}`);
-        this.showToast("Fullscreen not supported");
+        // Fallback: hide header and go as close to fullscreen as possible
+        this._applyFullscreenUI(true);
+        this.showToast("📺 Fullscreen Mode");
       });
+      this._applyFullscreenUI(true);
     } else {
       document.exitFullscreen();
+      this._applyFullscreenUI(false);
+    }
+  }
+
+  _applyFullscreenUI(isFullscreen) {
+    const header = document.getElementById('header-bar');
+    const remote = document.getElementById('virtual-remote-container');
+    const btn = document.getElementById('btn-fullscreen-toggle');
+
+    if (isFullscreen) {
+      if (header) header.style.opacity = '0';
+      if (header) header.style.pointerEvents = 'none';
+      if (remote) remote.classList.add('hidden');
+      if (btn) btn.querySelector('span').textContent = '⛶ Exit Full';
+      document.body.classList.add('is-fullscreen');
+    } else {
+      if (header) header.style.opacity = '';
+      if (header) header.style.pointerEvents = '';
+      if (btn) btn.querySelector('span').textContent = '⛶ Fullscreen';
+      document.body.classList.remove('is-fullscreen');
     }
   }
 
