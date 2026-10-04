@@ -1,0 +1,21 @@
+{
+  "name": "org.iptv.webos",
+  "version": "1.0.0",
+  "description": "LG webOS Live IPTV App with Remote Control Navigation",
+  "main": "index.html",
+  "scripts": {
+    "start": "node dev-server.js",
+    "icons": "node generate-icons.js",
+    "build:ipk": "npx -p @webos-tools/cli ares-package . -o ./dist --no-minify"
+  },
+  "keywords": [
+    "webos",
+    "lg-tv",
+    "iptv",
+    "smart-tv",
+    "remote-control",
+    "m3u"
+  ],
+  "author": "IPTV",
+  "license": "MIT"
+}

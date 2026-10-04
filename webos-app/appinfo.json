@@ -1,0 +1,15 @@
+{
+  "id": "org.iptv.webos",
+  "version": "1.0.0",
+  "vendor": "IPTV",
+  "type": "web",
+  "main": "index.html",
+  "title": "IPTV Live TV",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "resolution": "1920x1080",
+  "requiredACG": [],
+  "requiredPermissions": [
+    "media.controller"
+  ]
+}

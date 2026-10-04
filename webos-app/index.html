@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- webOS 1080p Full HD Canvas -->
+  <meta name="viewport" content="width=1920, height=1080, user-scalable=no, initial-scale=1.0">
+  <title>IPTV Live TV - webOS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app-root">
+
+    <!-- Top Header Bar (Quick Access / Air Mouse) -->
+    <header id="header-bar">
+      <div class="tv-brand">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
+        </svg>
+        IPTV LIVE
+      </div>
+      <button id="btn-guide-toggle" class="header-btn" title="Open Channel Guide (Enter/OK)">
+        <span>☰ Channels</span>
+      </button>
+      <button id="btn-settings-toggle" class="header-btn" title="Settings & Playlists (Blue button)">
+        <span>⚙ Settings</span>
+      </button>
+      <button id="btn-fullscreen-toggle" class="header-btn" title="Toggle Fullscreen">
+        <span>⛶ Fullscreen</span>
+      </button>
+      <button id="btn-virtual-remote-toggle" class="header-btn" title="Toggle On-Screen Remote">
+        <span>🎮 Remote</span>
+      </button>
+    </header>
+
+    <!-- Fullscreen Video Surface -->
+    <div id="video-container">
+      <video id="video-player" playsinline autoplay></video>
+    </div>
+
+    <!-- Stream Error / Offline Overlay -->
+    <div id="stream-error-overlay" class="hidden">
+      <div class="error-icon-box">✕</div>
+      <div class="error-title">Stream Offline</div>
+      <div id="stream-error-message" class="error-sub">Stream is currently unavailable.</div>
+      <div class="error-hint">
+        <span class="remote-pill">CH+</span> / <span class="remote-pill">CH-</span> to switch channel
+      </div>
+    </div>
+
+    <!-- Quick Number Dialing Overlay (Top-Right) -->
+    <div id="number-dial-osd" class="hidden">
+      <div class="dial-label">CH</div>
+      <div id="number-dial-digits">01</div>
+    </div>
+
+    <!-- Channel Info Banner (Bottom Floating Card OSD) -->
+    <div id="channel-osd" class="hidden">
+      <div class="osd-left">
+        <div id="osd-channel-num" class="osd-channel-num-box">01</div>
+        <div class="osd-logo-wrap">
+          <img id="osd-channel-logo" alt="Logo" style="display: none;" />
+        </div>
+        <div class="osd-info-text">
+          <div class="osd-title-row">
+            <span id="osd-channel-name">DW English HD</span>
+            <span id="osd-fav-icon" style="display: none;">★</span>
+          </div>
+          <div class="osd-meta-row">
+            <span id="osd-channel-category" class="osd-badge">News</span>
+            <span id="osd-channel-res" class="osd-badge res">1080p FHD</span>
+            <span id="stream-status-badge" class="status-badge playing">PLAYING</span>
+          </div>
+        </div>
+      </div>
+      <div class="osd-right">
+        <div class="osd-clock-box">
+          <div id="osd-clock">12:00</div>
+          <div class="osd-live-tag">LIVE STREAM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="tv-toast" class="hidden">Notification</div>
+
+    <!-- Sliding Channel Guide Drawer & Backdrop -->
+    <div id="guide-backdrop"></div>
+    <aside id="guide-drawer">
+      <div class="guide-header">
+        <div class="guide-title-row">
+          <div class="guide-title">
+            <span class="cyan-dot"></span>
+            TV Guide & Channels
+          </div>
+        </div>
+        <div class="guide-search-box">
+          <input type="text" id="channel-search-input" placeholder="Search channel name, number or genre..." />
+        </div>
+      </div>
+
+      <!-- Categories Filter Bar -->
+      <div class="guide-categories-container">
+        <div id="guide-categories-list"></div>
+      </div>
+
+      <!-- Channels List Scroll Area -->
+      <div class="guide-channels-container">
+        <div id="guide-channels-list"></div>
+      </div>
+
+      <!-- Remote Color Legend Footer -->
+      <div class="guide-footer-legend">
+        <div class="legend-item"><span class="color-dot red"></span> Fav</div>
+        <div class="legend-item"><span class="color-dot green"></span> Category</div>
+        <div class="legend-item"><span class="color-dot yellow"></span> Aspect</div>
+        <div class="legend-item"><span class="color-dot blue"></span> Settings</div>
+      </div>
+    </aside>
+
+    <!-- Settings & Custom Playlist Modal -->
+    <div id="settings-modal" class="hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">Playlist & Stream Settings</div>
+          <button id="modal-close-btn" class="modal-close">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="playlist-preset-select">Select Built-In Playlist / Region:</label>
+            <select id="playlist-preset-select" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="custom-m3u-url">Or Enter Custom M3U / M3U8 Playlist URL:</label>
+            <input type="text" id="custom-m3u-url" class="form-input" placeholder="https://example.com/playlist.m3u" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-save-playlist" class="btn-primary">Apply & Load Channels</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- On-Screen Virtual Remote Control (For PC Browser Development & Testing) -->
+    <div id="virtual-remote-container">
+      <div class="vrem-header">
+        <span class="vrem-title">LG TV REMOTE</span>
+        <button class="vrem-power-btn" title="Power">⏻</button>
+      </div>
+
+      <!-- Channel Rocker & Volume Rocker -->
+      <div class="vrem-rockers-row">
+        <div class="vrem-rocker">
+          <button id="vrem-vol-up">VOL +</button>
+          <div class="vrem-rocker-label">VOL</div>
+          <button id="vrem-vol-down">VOL -</button>
+        </div>
+        <div class="vrem-rocker">
+          <button id="vrem-ch-up">CH ∧</button>
+          <div class="vrem-rocker-label">CH</div>
+          <button id="vrem-ch-down">CH ∨</button>
+        </div>
+      </div>
+
+      <!-- D-Pad -->
+      <div class="vrem-dpad-wrap">
+        <button id="vrem-up" class="vrem-dpad-btn up">▲</button>
+        <button id="vrem-down" class="vrem-dpad-btn down">▼</button>
+        <button id="vrem-left" class="vrem-dpad-btn left">◀</button>
+        <button id="vrem-right" class="vrem-dpad-btn right">▶</button>
+        <button id="vrem-ok" class="vrem-dpad-btn ok">OK</button>
+      </div>
+
+      <!-- Back / Guide / Info / Fullscreen Buttons -->
+      <div class="vrem-util-row">
+        <button id="vrem-back" class="vrem-btn-small">BACK</button>
+        <button id="vrem-guide" class="vrem-btn-small">GUIDE</button>
+        <button id="vrem-info" class="vrem-btn-small">INFO</button>
+        <button id="vrem-fullscreen" class="vrem-btn-small">FULL</button>
+      </div>
+
+      <!-- 0-9 Keypad -->
+      <div class="vrem-numpad-grid">
+        <button id="vrem-1" class="vrem-num-btn">1</button>
+        <button id="vrem-2" class="vrem-num-btn">2</button>
+        <button id="vrem-3" class="vrem-num-btn">3</button>
+        <button id="vrem-4" class="vrem-num-btn">4</button>
+        <button id="vrem-5" class="vrem-num-btn">5</button>
+        <button id="vrem-6" class="vrem-num-btn">6</button>
+        <button id="vrem-7" class="vrem-num-btn">7</button>
+        <button id="vrem-8" class="vrem-num-btn">8</button>
+        <button id="vrem-9" class="vrem-num-btn">9</button>
+        <button id="vrem-play" class="vrem-num-btn">▶/❚❚</button>
+        <button id="vrem-0" class="vrem-num-btn">0</button>
+        <button id="vrem-enter" class="vrem-num-btn">↵</button>
+      </div>
+
+      <!-- Color Keys -->
+      <div class="vrem-color-row">
+        <button id="vrem-red" class="vrem-color-btn red" title="Red: Favorite">FAV</button>
+        <button id="vrem-green" class="vrem-color-btn green" title="Green: Category">CAT</button>
+        <button id="vrem-yellow" class="vrem-color-btn yellow" title="Yellow: Aspect">ASP</button>
+        <button id="vrem-blue" class="vrem-color-btn blue" title="Blue: Settings">SET</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/lib/webos-adapter.js"></script>
+  <script src="js/lib/hls.min.js"></script>
+  <script src="js/channels.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/remote.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

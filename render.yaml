@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: iptv-live-tv
+    env: static
+    buildCommand: ""
+    staticPublishPath: ./webos-app
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"
