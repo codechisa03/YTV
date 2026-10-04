@@ -1,80 +1,165 @@
-# IPTV [![update](https://github.com/iptv-org/iptv/actions/workflows/update.yml/badge.svg)](https://github.com/iptv-org/iptv/actions/workflows/update.yml)
+# 📺 YTV — Free IPTV Streams & LG webOS App
 
-Collection of publicly available IPTV (Internet Protocol television) channels from all over the world.
+> A curated collection of **8,000+ free, publicly available IPTV streams** organized by country, plus a polished **LG webOS Smart TV application** with full remote-control support.
 
-## Table of contents
+![Preview](.readme/preview.png)
 
-- 🚀 [How to use?](#how-to-use)
-- 📺 [Playlists](#playlists)
-- 🗓 [EPG](#epg)
-- 🗄 [Database](#database)
-- 👨‍💻 [API](#api)
-- 📚 [Resources](#resources)
-- 💬 [Discussions](#discussions)
-- ❓ [FAQ](#faq)
-- 🛠 [Contribution](#contribution)
-- ⚖ [Legal](#legal)
-- © [License](#license)
+---
 
-## How to use?
+## 🌍 Playlists
 
-Simply paste the link to one of the playlists into [any video player](https://github.com/iptv-org/awesome-iptv#apps) that supports live streaming and press _Open_.
+All streams are provided as **M3U / M3U8** playlists grouped in multiple ways. See [PLAYLISTS.md](PLAYLISTS.md) for the full list.
 
-![VLC Network Panel](https://github.com/iptv-org/iptv/raw/master/.readme/preview.png)
+### Quick-Start URLs
 
-## Playlists
+| Grouping | URL |
+|---|---|
+| By Category | `https://iptv-org.github.io/iptv/index.category.m3u` |
+| By Language | `https://iptv-org.github.io/iptv/index.language.m3u` |
+| By Country | `https://iptv-org.github.io/iptv/index.country.m3u` |
+| By Source (raw) | `https://iptv-org.github.io/iptv/raw/<FILENAME>.m3u` |
 
-The main playlist containing all channels available in the repository can be found at:
+> **Tip:** You can load any of these URLs directly into [VLC](https://www.videolan.org/vlc/), Kodi, TiviMate, or any M3U-compatible app.
+
+### Country Streams
+
+Individual country streams live in the [`streams/`](streams/) folder (e.g. `streams/us.m3u`, `streams/in.m3u`, `streams/uk.m3u`). Source-specific playlists are named `<country>_<source>.m3u` (e.g. `streams/us_pluto.m3u`).
+
+---
+
+## 📱 LG webOS Smart TV App
+
+A fully-featured **10-foot living-room UI** application designed for **LG webOS Smart TVs**.
+
+### Key Features
+
+- **🎮 Full Remote Control Support**
+  - `CH+` / `CH-` — Next / previous channel with on-screen OSD banner
+  - `0–9` — Direct channel number dialling
+  - `OK / Enter` — Open visual Channel Guide & EPG drawer
+  - `D-Pad` — Up/Down channel cards, Left/Right category switching
+  - `Red / Green / Yellow / Blue` — Favorites, Categories, Aspect Ratio, Settings
+  - `Magic Remote` — Full air-mouse pointer & click support
+
+- **🖥️ Stunning 10-Foot UI**
+  - OLED deep-black styling with glowing focus borders
+  - Channel OSD banner: number, logo, name, category, resolution, live clock
+  - Channel number dial overlay with countdown timer
+  - Category filters: All, News, Sports, Movies, Music, Kids, Entertainment, Favorites
+
+- **⚡ Robust Streaming**
+  - Powered by [HLS.js](https://github.com/video-dev/hls.js) with webOS-tuned buffers
+  - Automatic error recovery & stream status notifications
+
+- **📡 Playlist Management**
+  - Preloaded curated streams from `iptv-org`
+  - Built-in country & category feeds (US, UK, India, Germany, France, and more)
+  - Custom M3U / M3U8 URL input support
+
+- **🛠️ Developer Tools**
+  - Built-in local HTTP dev server with interactive Virtual Remote on PC
+  - Official webOS `appinfo.json` and `.ipk` build configuration
+
+### Getting Started (webOS App)
+
+See **[webos-app/INSTALLATION_GUIDE.md](webos-app/INSTALLATION_GUIDE.md)** for complete instructions on:
+- Running in a browser for development
+- Sideloading onto your LG Smart TV
+
+---
+
+## ☁️ Cloud Hosting
+
+The webOS app is a 100% static web app and can be hosted for free. See **[HOSTING.md](HOSTING.md)** for step-by-step guides for:
+
+| Platform | Config File | URL pattern |
+|---|---|---|
+| **Vercel** *(recommended)* | `vercel.json` | `https://your-app.vercel.app` |
+| **Render** | `render.yaml` | `https://your-app.onrender.com` |
+
+---
+
+## 🛠️ Development Scripts
+
+Requires [Node.js](https://nodejs.org/) installed. Run any script with `npm run <script-name>`.
+
+| Script | Description |
+|---|---|
+| `api:load` | Download latest channel & stream data from iptv-org API |
+| `playlist:format` | Normalise URLs, remove duplicates, sort by name/quality |
+| `playlist:update` | Process approved issue requests into playlists |
+| `playlist:generate` | Generate all public playlists |
+| `playlist:validate` | Check IDs and links for errors |
+| `playlist:lint` | Check playlists for M3U syntax errors |
+| `playlist:test` | Live-test stream links and report status |
+| `playlist:export` | Export streams as JSON for the iptv-org API |
+| `readme:update` | Regenerate PLAYLISTS.md |
+| `report:create` | Create a report on current open issues |
+| `lint` | Lint all TypeScript/JavaScript scripts |
+| `test` | Run full test suite |
+
+### Stream Testing Example
+
+```sh
+# Test all streams in a country file
+npm run playlist:test streams/us.m3u
+
+# Auto-remove broken streams
+npm run playlist:test streams/us.m3u --- --fix
+```
+
+---
+
+## 📁 Project Structure
 
 ```
-https://iptv-org.github.io/iptv/index.m3u
+YTV/
+├── .github/          # GitHub Actions workflows & issue templates
+├── .readme/          # Assets & template used to generate PLAYLISTS.md
+├── scripts/          # All automation scripts (TypeScript)
+├── streams/          # Internal M3U playlists by country/source
+├── tests/            # Script unit tests
+├── webos-app/        # LG webOS Smart TV application
+│   ├── css/          # App stylesheets
+│   ├── js/           # App JavaScript
+│   ├── data/         # Bundled channel data
+│   ├── index.html    # App entry point
+│   └── appinfo.json  # webOS app manifest
+├── CONTRIBUTING.md   # How to contribute streams or fixes
+├── FAQ.md            # Frequently asked questions
+├── HOSTING.md        # Vercel & Render deployment guide
+├── PLAYLISTS.md      # Auto-generated full playlist directory
+├── vercel.json       # Vercel deployment config
+└── render.yaml       # Render deployment config
 ```
 
-Links to other playlists can be found in the [PLAYLISTS.md](PLAYLISTS.md) file.
+---
 
-## EPG
+## 🤝 Contributing
 
-[Electronic Program Guide](https://en.wikipedia.org/wiki/Electronic_program_guide) for most of the channels can be downloaded using utilities published in the [iptv-org/epg](https://github.com/iptv-org/epg) repository.
+We welcome stream additions, fixes, and improvements!
 
-## Database
+- **Add a stream** — [Open a request](https://github.com/iptv-org/iptv/issues/new?assignees=&labels=streams:add&template=1_streams_add.yml&title=Add%3A+) or submit a pull request.
+- **Report a broken stream** — [Fill out the form](https://github.com/iptv-org/iptv/issues/new?assignees=&labels=streams:remove&template=3_streams_report.yml&title=Broken%3A+).
+- **Fix metadata** — See the [iptv-org/database](https://github.com/iptv-org/database) repository.
 
-All channel data is taken from the [iptv-org/database](https://github.com/iptv-org/database) repository. If you find any errors please open a new [issue](https://github.com/iptv-org/database/issues) there.
+Read **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide including the stream description scheme, project structure, and available scripts.
 
-## API
+---
 
-The API documentation can be found in the [iptv-org/api](https://github.com/iptv-org/api) repository.
+## ❓ FAQ
 
-## Resources
+See **[FAQ.md](FAQ.md)** for answers to common questions including:
+- Why isn't my channel in the playlist?
+- Why are Xtream Codes links not accepted?
+- Can I add radio broadcasts?
 
-Links to other useful IPTV-related resources can be found in the [iptv-org/awesome-iptv](https://github.com/iptv-org/awesome-iptv) repository.
+---
 
-## Discussions
+## 📄 License
 
-If you have a question or idea, welcome to the [Discussions](https://github.com/orgs/iptv-org/discussions).
+[MIT License](LICENSE) — free to use, modify, and distribute.
 
-## FAQ
+---
 
-The answers to the most popular questions can be found in the [FAQ.md](FAQ.md) file.
-
-## Contribution
-
-Please make sure to read the [Contributing Guide](CONTRIBUTING.md) before sending an issue or making a pull request.
-
-And thank you to everyone who has already contributed!
-
-### Backers
-
-<a href="https://opencollective.com/iptv-org"><img src="https://opencollective.com/iptv-org/backers.svg?width=890" /></a>
-
-### Contributors
-
-<a href="https://github.com/iptv-org/iptv/graphs/contributors"><img src="https://opencollective.com/iptv-org/contributors.svg?width=890" /></a>
-
-## Legal
-
-No video files are stored in this repository. The repository simply contains user-submitted links to publicly available video stream URLs, which to the best of our knowledge have been intentionally made publicly by the copyright holders. If any links in these playlists infringe on your rights as a copyright holder, they may be removed by opening an [issue](https://github.com/iptv-org/iptv/issues/new?template=6_copyright-claim.yml). However, note that we have **no control** over the destination of the link, and just removing the link from the playlist will not remove its contents from the web. Note that linking does not directly infringe copyright because no copy is made on the site providing the link, and thus this is **not** a valid reason to send a DMCA notice to GitHub. To remove this content from the web, you should contact the web host that's actually hosting the content (**not** GitHub, nor the maintainers of this repository).
-
-## License
-
-[![CC0](http://mirrors.creativecommons.org/presskit/buttons/88x31/svg/cc-zero.svg)](LICENSE)
-
+*Streams are sourced from publicly available links on the internet. We do not host or serve any video content directly.*
