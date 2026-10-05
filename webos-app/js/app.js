@@ -293,6 +293,11 @@ class IPTVApp {
     this.highlightCurrentChannelInList();
     this.showToast(`Now Live: CH ${channel.num} - ${channel.name}`);
     this.updateGlobalBackButton();
+
+    // Auto-enter fullscreen for TV/mobile immersive experience
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(err => console.warn(`Auto-fullscreen rejected: ${err.message}`));
+    }
   }
 
   closePlayerModal() {
@@ -301,6 +306,11 @@ class IPTVApp {
     if (playerContainer) playerContainer.classList.add('hidden');
     if (this.player) this.player.stop();
     this.updateGlobalBackButton();
+
+    // Auto-exit fullscreen when closing player
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(err => console.warn(`Exit-fullscreen rejected: ${err.message}`));
+    }
   }
 
   playChannel(channel) {
