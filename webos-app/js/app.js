@@ -64,21 +64,26 @@ class IPTVApp {
     const closePlayerBtn = document.getElementById('btn-close-player');
     if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => this.closePlayerModal());
 
-    // Category Nav Button clicks
-    document.querySelectorAll('.main-nav .nav-item[data-category], .mob-nav-btn[data-category]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cat = btn.getAttribute('data-category');
-        document.querySelectorAll('.nav-item, .mob-nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (cat) {
-          this.channelManager.applyCategoryFilter(cat);
-          this.renderAllChannelCarousels();
-          this.showToast(`Showing ${cat} channels`);
-        }
-      });
+    // Shared category apply helper
+    const applyCategory = (cat) => {
+      this.channelManager.applyCategoryFilter(cat);
+      this.renderAllChannelCarousels();
+      this.showToast(cat === 'All' ? 'All Channels' : `${cat} Channels`);
+      document.querySelectorAll('.nav-item[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
+      document.querySelectorAll('.mob-nav-btn[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
+      document.querySelectorAll('.cat-pill[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
+    };
+
+    document.querySelectorAll('.nav-item[data-category]').forEach(btn => {
+      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
+    });
+    document.querySelectorAll('.mob-nav-btn[data-category]').forEach(btn => {
+      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
+    });
+    document.querySelectorAll('.cat-pill[data-category]').forEach(btn => {
+      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
     });
 
-    // Mobile specific button listeners
     const mobGuideBtn = document.getElementById('btn-mob-guide');
     if (mobGuideBtn) mobGuideBtn.addEventListener('click', () => this.toggleGuide());
 
