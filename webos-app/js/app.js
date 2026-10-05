@@ -72,6 +72,7 @@ class IPTVApp {
       document.querySelectorAll('.nav-item[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
       document.querySelectorAll('.mob-nav-btn[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
       document.querySelectorAll('.cat-pill[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
+      this.updateGlobalBackButton();
     };
 
     document.querySelectorAll('.nav-item[data-category]').forEach(btn => {
@@ -83,6 +84,9 @@ class IPTVApp {
     document.querySelectorAll('.cat-pill[data-category]').forEach(btn => {
       btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
     });
+
+    const btnGlobalBack = document.getElementById('btn-global-back');
+    if (btnGlobalBack) btnGlobalBack.addEventListener('click', () => this.handleGlobalBack());
 
     const mobGuideBtn = document.getElementById('btn-mob-guide');
     if (mobGuideBtn) mobGuideBtn.addEventListener('click', () => this.toggleGuide());
@@ -287,6 +291,7 @@ class IPTVApp {
     this.showOSD();
     this.highlightCurrentChannelInList();
     this.showToast(`Now Live: CH ${channel.num} - ${channel.name}`);
+    this.updateGlobalBackButton();
   }
 
   closePlayerModal() {
@@ -294,6 +299,7 @@ class IPTVApp {
     const playerContainer = document.getElementById('video-container');
     if (playerContainer) playerContainer.classList.add('hidden');
     if (this.player) this.player.stop();
+    this.updateGlobalBackButton();
   }
 
   playChannel(channel) {
@@ -485,12 +491,14 @@ class IPTVApp {
     this.guideOpen = true;
     document.getElementById('guide-drawer').classList.add('open');
     document.getElementById('guide-backdrop').classList.add('open');
+    this.updateGlobalBackButton();
   }
 
   closeGuide() {
     this.guideOpen = false;
     document.getElementById('guide-drawer').classList.remove('open');
     document.getElementById('guide-backdrop').classList.remove('open');
+    this.updateGlobalBackButton();
   }
 
   toggleGuide() {
@@ -581,11 +589,13 @@ class IPTVApp {
         select.appendChild(opt);
       });
     }
+    this.updateGlobalBackButton();
   }
 
   closeSettings() {
     this.settingsOpen = false;
     document.getElementById('settings-modal').classList.add('hidden');
+    this.updateGlobalBackButton();
   }
 
   toggleSettings() {
@@ -608,6 +618,30 @@ class IPTVApp {
     this.renderAllChannelCarousels();
 
     this.showToast(`Loaded ${this.channelManager.channels.length} channels`);
+  }
+
+  updateGlobalBackButton() {
+    const btn = document.getElementById('btn-global-back');
+    if (!btn) return;
+    if (this.playerModalOpen || this.guideOpen || this.settingsOpen || this.channelManager.currentCategory !== 'All') {
+      btn.style.display = 'flex';
+    } else {
+      btn.style.display = 'none';
+    }
+  }
+
+  handleGlobalBack() {
+    if (this.playerModalOpen) {
+      this.closePlayerModal();
+    } else if (this.settingsOpen) {
+      this.closeSettings();
+    } else if (this.guideOpen) {
+      this.closeGuide();
+    } else if (this.channelManager.currentCategory !== 'All') {
+      // Simulate clicking the Home tab
+      const allBtn = document.querySelector('.nav-item[data-category="All"]');
+      if (allBtn) allBtn.click();
+    }
   }
 }
 
