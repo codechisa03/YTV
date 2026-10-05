@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: ytv-streaming-app
+    name: iptv-live-tv
     env: static
-    buildCommand: npm run build
+    buildCommand: ""
     staticPublishPath: ./webos-app
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"

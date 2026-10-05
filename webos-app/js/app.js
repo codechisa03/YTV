@@ -1,6 +1,5 @@
 /**
- * app.js - Main Application Orchestrator for YTV Live TV Streaming Platform
- * 100% Dedicated to TV Channels with logos, numbers, names & categories
+ * app.js - Main Application Orchestrator for LG webOS TV IPTV App
  */
 
 class IPTVApp {
@@ -14,7 +13,10 @@ class IPTVApp {
     this.toastTimer = null;
     this.guideOpen = false;
     this.settingsOpen = false;
-    this.playerModalOpen = false;
+    this.guideFocusArea = 'channels'; // 'categories' | 'channels'
+    this.focusedCategoryIndex = 0;
+    this.focusedChannelIndex = 0;
+    this.focusedSettingsIndex = 0;
 
     // Clock
     this.clockInterval = null;
@@ -32,11 +34,18 @@ class IPTVApp {
     this.initClock();
     this.setupEventListeners();
 
-    // Initialize channels and render channel sections
+    // Initialize channels and load initial stream
     await this.channelManager.init();
     this.renderCategories();
     this.renderChannelList();
-    this.renderAllChannelCarousels();
+
+    const initialChannel = this.channelManager.getCurrentChannel();
+    if (initialChannel) {
+      this.playChannel(initialChannel);
+    }
+
+    // Set initial focus
+    this.focusedChannelIndex = this.channelManager.currentIndex;
   }
 
   initClock() {
@@ -52,115 +61,60 @@ class IPTVApp {
   }
 
   setupEventListeners() {
-    const guideToggleBtn = document.getElementById('btn-guide-toggle');
-    if (guideToggleBtn) guideToggleBtn.addEventListener('click', () => this.toggleGuide());
-
-    const settingsToggleBtn = document.getElementById('btn-settings-toggle');
-    if (settingsToggleBtn) settingsToggleBtn.addEventListener('click', () => this.toggleSettings());
-
+    // Magic Remote pointer / mouse hover and clicks
+    document.getElementById('btn-guide-toggle').addEventListener('click', () => this.toggleGuide());
+    document.getElementById('btn-settings-toggle').addEventListener('click', () => this.toggleSettings());
     const fullscreenBtn = document.getElementById('btn-fullscreen-toggle');
-    if (fullscreenBtn) fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+    if (fullscreenBtn) {
+      fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+    }
 
-    const closePlayerBtn = document.getElementById('btn-close-player');
-    if (closePlayerBtn) closePlayerBtn.addEventListener('click', () => this.closePlayerModal());
-
-    // Shared category apply helper
-    const applyCategory = (cat) => {
-      this.channelManager.applyCategoryFilter(cat);
-      this.renderAllChannelCarousels();
-      this.showToast(cat === 'All' ? 'All Channels' : `${cat} Channels`);
-      document.querySelectorAll('.nav-item[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
-      document.querySelectorAll('.mob-nav-btn[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
-      document.querySelectorAll('.cat-pill[data-category]').forEach(b => b.classList.toggle('active', b.getAttribute('data-category') === cat));
-      this.updateGlobalBackButton();
-    };
-
-    document.querySelectorAll('.nav-item[data-category]').forEach(btn => {
-      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
-    });
-    document.querySelectorAll('.mob-nav-btn[data-category]').forEach(btn => {
-      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
-    });
-    document.querySelectorAll('.cat-pill[data-category]').forEach(btn => {
-      btn.addEventListener('click', () => applyCategory(btn.getAttribute('data-category')));
+    // Sync UI when user presses Escape to exit fullscreen
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        this._applyFullscreenUI(false);
+      }
     });
 
-    const btnGlobalBack = document.getElementById('btn-global-back');
-    if (btnGlobalBack) btnGlobalBack.addEventListener('click', () => this.handleGlobalBack());
+    // Tap anywhere on video to show header again in fullscreen
+    document.getElementById('video-container').addEventListener('click', () => {
+      if (document.body.classList.contains('is-fullscreen')) {
+        const header = document.getElementById('header-bar');
+        if (header) {
+          header.style.opacity = '1';
+          header.style.pointerEvents = '';
+          clearTimeout(this._headerHideTimer);
+          this._headerHideTimer = setTimeout(() => {
+            if (document.body.classList.contains('is-fullscreen')) {
+              header.style.opacity = '0';
+              header.style.pointerEvents = 'none';
+            }
+          }, 3000);
+        }
+      }
+    });
+    document.getElementById('modal-close-btn').addEventListener('click', () => this.closeSettings());
+    document.getElementById('guide-backdrop').addEventListener('click', () => this.closeGuide());
 
-    const mobGuideBtn = document.getElementById('btn-mob-guide');
-    if (mobGuideBtn) mobGuideBtn.addEventListener('click', () => this.toggleGuide());
+    // Settings save button
+    document.getElementById('btn-save-playlist').addEventListener('click', () => this.saveCustomPlaylist());
 
-    const mobSettingsBtn = document.getElementById('btn-mob-settings');
-    if (mobSettingsBtn) mobSettingsBtn.addEventListener('click', () => this.toggleSettings());
-
-    // Hero Watch Now Button
-    const heroPlayBtn = document.getElementById('btn-hero-play');
-    if (heroPlayBtn) {
-      heroPlayBtn.addEventListener('click', () => {
-        const sunTv = this.channelManager.channels.find(c => c.id === 'sun-tv') || this.channelManager.channels[0];
-        if (sunTv) this.playChannelModal(sunTv);
-      });
-    }
-
-    const heroGuideBtn = document.getElementById('btn-hero-guide');
-    if (heroGuideBtn) {
-      heroGuideBtn.addEventListener('click', () => this.openGuide());
-    }
-
-    // Hero Carousel Arrow Controls
-    const heroPrev = document.getElementById('hero-prev');
-    const heroNext = document.getElementById('hero-next');
-    if (heroPrev && heroNext) {
-      const heroSlides = [
-        { channelId: "sun-tv", title: "SUN TV LIVE", desc: "Watch live blockbuster Tamil hit movies, exclusive daily serials, and live show telecasts uninterrupted on Sun TV." },
-        { channelId: "star-vijay", title: "STAR VIJAY LIVE", desc: "Enjoy live reality shows, award functions, mega serials, and high-energy Tamil entertainment." },
-        { channelId: "zee-tamil", title: "ZEE TAMIL LIVE", desc: "Stream live serials, fiction dramas, and popular Sunday Tamil cinema specials." }
-      ];
-      let slideIdx = 0;
-      const updateHeroSlide = (idx) => {
-        slideIdx = (idx + heroSlides.length) % heroSlides.length;
-        const item = heroSlides[slideIdx];
-        const titleEl = document.getElementById('hero-title-text');
-        const descEl = document.getElementById('hero-desc-text');
-        if (titleEl) titleEl.textContent = item.title;
-        if (descEl) descEl.textContent = item.desc;
-      };
-      heroPrev.addEventListener('click', () => updateHeroSlide(slideIdx - 1));
-      heroNext.addEventListener('click', () => updateHeroSlide(slideIdx + 1));
-    }
-
-    // Global Search Input
-    const globalSearchInput = document.getElementById('global-search-input');
-    if (globalSearchInput) {
-      globalSearchInput.addEventListener('input', (e) => {
-        const val = e.target.value.trim();
-        const filtered = this.channelManager.search(val);
-        this.renderAllChannelCarousels(filtered);
-      });
-    }
-
-    // Guide search
-    const guideSearchInput = document.getElementById('channel-search-input');
-    if (guideSearchInput) {
-      guideSearchInput.addEventListener('input', (e) => {
+    // Search input
+    const searchInput = document.getElementById('channel-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
         const filtered = this.channelManager.search(e.target.value);
         this.renderChannelList(filtered);
       });
     }
 
-    document.getElementById('modal-close-btn').addEventListener('click', () => this.closeSettings());
-    document.getElementById('guide-backdrop').addEventListener('click', () => this.closeGuide());
-    document.getElementById('btn-save-playlist').addEventListener('click', () => this.saveCustomPlaylist());
-
-    // ESC Key to close player or modals
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' || e.keyCode === 27) {
-        if (this.playerModalOpen) this.closePlayerModal();
-        if (this.guideOpen) this.closeGuide();
-        if (this.settingsOpen) this.closeSettings();
-      }
-    });
+    // Virtual remote toggler
+    const toggleRemoteBtn = document.getElementById('btn-virtual-remote-toggle');
+    if (toggleRemoteBtn) {
+      toggleRemoteBtn.addEventListener('click', () => {
+        document.getElementById('virtual-remote-container').classList.toggle('hidden');
+      });
+    }
 
     this.setupVirtualRemoteButtons();
   }
@@ -195,6 +149,7 @@ class IPTVApp {
       }
     });
 
+    // Digits 0-9
     for (let i = 0; i <= 9; i++) {
       const btn = document.getElementById(`vrem-${i}`);
       if (btn) {
@@ -206,131 +161,37 @@ class IPTVApp {
     }
   }
 
-  // Helper to create TV Channel Card HTML element
-  createChannelCardElement(ch) {
-    const card = document.createElement('div');
-    card.className = 'live-channel-card';
-    card.setAttribute('data-id', ch.id || ch.num);
-    card.setAttribute('tabindex', '0'); // CRITICAL: Makes the card focusable by TV remote D-Pad
+  // --- Channel Playback ---
 
-    card.innerHTML = `
-      <div class="card-top-badges">
-        <span class="ch-number-badge">CH ${String(ch.num).padStart(2, '0')}</span>
-        <span class="live-badge">LIVE</span>
-      </div>
-      <div class="channel-card-logo-box">
-        <img class="channel-card-logo-img" src="${ch.logo}" alt="${ch.name}" onerror="this.src='https://i.imgur.com/Yh3265D.png'" />
-      </div>
-      <div class="channel-card-details">
-        <div class="channel-name-title">${ch.name}</div>
-        <div class="channel-genre-sub">${ch.category || 'Entertainment'}</div>
-      </div>
-    `;
-
-    card.addEventListener('click', () => {
-      this.channelManager.selectChannel(ch);
-      this.playChannelModal(ch);
-    });
-
-    return card;
-  }
-
-  // --- Render TV Channels Carousels & Grid ---
-  renderAllChannelCarousels(customList = null) {
-    const list = customList || this.channelManager.filteredChannels;
-
-    // Row 1: Live Tamil Channels
-    const tamilContainer = document.getElementById('tamil-channels-container');
-    if (tamilContainer) {
-      tamilContainer.innerHTML = '';
-      const tamilList = list.filter(c => c.country === 'IN' || c.category === 'Entertainment' || c.name.toLowerCase().includes('tamil') || c.num <= 16);
-      (tamilList.length > 0 ? tamilList : list).forEach(ch => {
-        tamilContainer.appendChild(this.createChannelCardElement(ch));
-      });
-    }
-
-    // Row 2: Entertainment & Serials
-    const entContainer = document.getElementById('entertainment-channels-container');
-    if (entContainer) {
-      entContainer.innerHTML = '';
-      const entList = list.filter(c => c.category === 'Entertainment' || c.category === 'Movies');
-      (entList.length > 0 ? entList : list).forEach(ch => {
-        entContainer.appendChild(this.createChannelCardElement(ch));
-      });
-    }
-
-    // Row 3: News & Sports Channels
-    const newsContainer = document.getElementById('news-sports-channels-container');
-    if (newsContainer) {
-      newsContainer.innerHTML = '';
-      const newsList = list.filter(c => c.category === 'News' || c.category === 'Sports');
-      (newsList.length > 0 ? newsList : list).slice(0, 20).forEach(ch => {
-        newsContainer.appendChild(this.createChannelCardElement(ch));
-      });
-    }
-
-    // Section 4: All TV Channels Grid
-    const allGrid = document.getElementById('all-channels-grid-container');
-    if (allGrid) {
-      allGrid.innerHTML = '';
-      list.forEach(ch => {
-        allGrid.appendChild(this.createChannelCardElement(ch));
-      });
-    }
-  }
-
-  // --- Channel Playback Modal Surface ---
-  playChannelModal(channel) {
+  playChannel(channel) {
     if (!channel) return;
-    this.playerModalOpen = true;
-
-    const playerContainer = document.getElementById('video-container');
-    if (playerContainer) playerContainer.classList.remove('hidden');
-
     this.player.playStream(channel.url);
     this.updateOSD(channel);
     this.showOSD();
     this.highlightCurrentChannelInList();
-    this.showToast(`Now Live: CH ${channel.num} - ${channel.name}`);
-    this.updateGlobalBackButton();
-
-    // Auto-enter fullscreen for TV/mobile immersive experience
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-      document.documentElement.requestFullscreen().catch(err => console.warn(`Auto-fullscreen rejected: ${err.message}`));
-    }
-  }
-
-  closePlayerModal() {
-    this.playerModalOpen = false;
-    const playerContainer = document.getElementById('video-container');
-    if (playerContainer) playerContainer.classList.add('hidden');
-    if (this.player) this.player.stop();
-    this.updateGlobalBackButton();
-
-    // Auto-exit fullscreen when closing player
-    if (document.fullscreenElement && document.exitFullscreen) {
-      document.exitFullscreen().catch(err => console.warn(`Exit-fullscreen rejected: ${err.message}`));
-    }
-  }
-
-  playChannel(channel) {
-    this.playChannelModal(channel);
   }
 
   nextChannel() {
     const ch = this.channelManager.nextChannel();
-    if (ch) this.playChannelModal(ch);
+    if (ch) {
+      this.playChannel(ch);
+      this.showToast(`CH ${ch.num}: ${ch.name}`);
+    }
   }
 
   prevChannel() {
     const ch = this.channelManager.prevChannel();
-    if (ch) this.playChannelModal(ch);
+    if (ch) {
+      this.playChannel(ch);
+      this.showToast(`CH ${ch.num}: ${ch.name}`);
+    }
   }
 
   jumpToChannelNumber(num) {
     const ch = this.channelManager.jumpToNumber(num);
     if (ch) {
-      this.playChannelModal(ch);
+      this.playChannel(ch);
+      this.showToast(`Jumped to CH ${ch.num}: ${ch.name}`);
     } else {
       this.showToast(`Channel ${num} not found`, 3000);
     }
@@ -341,12 +202,13 @@ class IPTVApp {
     if (channels && channels[index]) {
       const ch = channels[index];
       this.channelManager.selectChannel(ch);
-      this.playChannelModal(ch);
+      this.playChannel(ch);
       this.closeGuide();
     }
   }
 
-  // --- OSD Banner & Overlays ---
+  // --- OSD Banner & Dial Overlays ---
+
   updateOSD(channel) {
     const numEl = document.getElementById('osd-channel-num');
     const nameEl = document.getElementById('osd-channel-name');
@@ -378,6 +240,7 @@ class IPTVApp {
     if (!osd) return;
 
     osd.classList.remove('hidden');
+    osd.classList.add('visible');
 
     if (this.osdTimer) clearTimeout(this.osdTimer);
     this.osdTimer = setTimeout(() => {
@@ -387,12 +250,15 @@ class IPTVApp {
 
   hideOSD() {
     const osd = document.getElementById('channel-osd');
-    if (osd) osd.classList.add('hidden');
+    if (osd) {
+      osd.classList.remove('visible');
+      osd.classList.add('hidden');
+    }
   }
 
   toggleInfoOSD() {
     const osd = document.getElementById('channel-osd');
-    if (osd && !osd.classList.contains('hidden')) {
+    if (osd && osd.classList.contains('visible')) {
       this.hideOSD();
     } else {
       const current = this.channelManager.getCurrentChannel();
@@ -407,12 +273,16 @@ class IPTVApp {
     if (dialEl && textEl) {
       textEl.textContent = digits;
       dialEl.classList.remove('hidden');
+      dialEl.classList.add('visible');
     }
   }
 
   hideNumberDial() {
     const dialEl = document.getElementById('number-dial-osd');
-    if (dialEl) dialEl.classList.add('hidden');
+    if (dialEl) {
+      dialEl.classList.remove('visible');
+      dialEl.classList.add('hidden');
+    }
   }
 
   showToast(message, duration = 2200) {
@@ -420,13 +290,17 @@ class IPTVApp {
     if (!toast) return;
 
     toast.textContent = message;
+    toast.classList.remove('hidden');
     toast.classList.add('visible');
 
     if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(() => {
       toast.classList.remove('visible');
+      toast.classList.add('hidden');
     }, duration);
   }
+
+  // --- Player Status Callbacks ---
 
   onPlayerStatusChange(status, details = "") {
     const statusEl = document.getElementById('stream-status-badge');
@@ -448,8 +322,12 @@ class IPTVApp {
 
   onResolutionChange(res) {
     const resEl = document.getElementById('osd-channel-res');
-    if (resEl) resEl.textContent = res;
+    if (resEl) {
+      resEl.textContent = res;
+    }
   }
+
+  // --- Shortcuts: Fav, Aspect, Category ---
 
   toggleFavorite() {
     const current = this.channelManager.getCurrentChannel();
@@ -477,7 +355,6 @@ class IPTVApp {
     this.channelManager.applyCategoryFilter(newCat);
     this.renderCategories();
     this.renderChannelList();
-    this.renderAllChannelCarousels();
     this.showToast(`Category: ${newCat}`);
   }
 
@@ -489,32 +366,63 @@ class IPTVApp {
   toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => {
-        console.warn(`Fullscreen error: ${err.message}`);
+        console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+        // Fallback: hide header and go as close to fullscreen as possible
+        this._applyFullscreenUI(true);
+        this.showToast("📺 Fullscreen Mode");
       });
-      this.showToast("📺 Fullscreen Mode");
+      this._applyFullscreenUI(true);
     } else {
       document.exitFullscreen();
+      this._applyFullscreenUI(false);
     }
   }
 
-  // --- Guide Drawer ---
+  _applyFullscreenUI(isFullscreen) {
+    const header = document.getElementById('header-bar');
+    const remote = document.getElementById('virtual-remote-container');
+    const btn = document.getElementById('btn-fullscreen-toggle');
+
+    if (isFullscreen) {
+      if (header) header.style.opacity = '0';
+      if (header) header.style.pointerEvents = 'none';
+      if (remote) remote.classList.add('hidden');
+      if (btn) btn.querySelector('span').textContent = '⛶ Exit Full';
+      document.body.classList.add('is-fullscreen');
+    } else {
+      if (header) header.style.opacity = '';
+      if (header) header.style.pointerEvents = '';
+      if (btn) btn.querySelector('span').textContent = '⛶ Fullscreen';
+      document.body.classList.remove('is-fullscreen');
+    }
+  }
+
+  // --- Guide Drawer & Spatial Navigation ---
+
+  isGuideOpen() {
+    return this.guideOpen;
+  }
+
   openGuide() {
     this.guideOpen = true;
     document.getElementById('guide-drawer').classList.add('open');
     document.getElementById('guide-backdrop').classList.add('open');
-    this.updateGlobalBackButton();
+    this.guideFocusArea = 'channels';
+    this.highlightGuideItem();
   }
 
   closeGuide() {
     this.guideOpen = false;
     document.getElementById('guide-drawer').classList.remove('open');
     document.getElementById('guide-backdrop').classList.remove('open');
-    this.updateGlobalBackButton();
   }
 
   toggleGuide() {
-    if (this.guideOpen) this.closeGuide();
-    else this.openGuide();
+    if (this.guideOpen) {
+      this.closeGuide();
+    } else {
+      this.openGuide();
+    }
   }
 
   renderCategories() {
@@ -522,15 +430,15 @@ class IPTVApp {
     if (!container) return;
     container.innerHTML = '';
 
-    this.channelManager.categories.forEach((cat) => {
+    this.channelManager.categories.forEach((cat, index) => {
       const btn = document.createElement('button');
       btn.className = 'category-tab' + (cat === this.channelManager.currentCategory ? ' active' : '');
       btn.textContent = cat;
+      btn.setAttribute('data-index', index);
       btn.addEventListener('click', () => {
         this.channelManager.applyCategoryFilter(cat);
         this.renderCategories();
         this.renderChannelList();
-        this.renderAllChannelCarousels();
       });
       container.appendChild(btn);
     });
@@ -542,27 +450,34 @@ class IPTVApp {
     container.innerHTML = '';
 
     const list = customList || this.channelManager.filteredChannels;
+
     if (!list || list.length === 0) {
-      container.innerHTML = '<div class="empty-state" style="padding:20px;text-align:center;color:#888;">No channels found</div>';
+      container.innerHTML = '<div class="empty-state">No channels found in this category</div>';
       return;
     }
 
     const currentChannel = this.channelManager.getCurrentChannel();
-    const renderList = list.slice(0, 150);
+    const maxRender = 300;
+    const renderList = list.slice(0, maxRender);
 
     renderList.forEach((ch, idx) => {
       const item = document.createElement('div');
       item.className = 'channel-card' + (currentChannel && ch.num === currentChannel.num ? ' playing' : '');
+      item.setAttribute('data-index', idx);
+
+      const isFav = this.channelManager.isFavorite(ch);
 
       item.innerHTML = `
         <div class="channel-num-badge">${String(ch.num).padStart(2, '0')}</div>
         <div class="channel-logo-wrap">
-          <img class="channel-card-logo" src="${ch.logo}" onerror="this.style.display='none'" />
+          ${ch.logo ? `<img class="channel-card-logo" src="${ch.logo}" onerror="this.style.display='none'" />` : '<div class="logo-placeholder">TV</div>'}
         </div>
         <div class="channel-card-info">
           <div class="channel-card-name">${ch.name}</div>
-          <div class="channel-card-sub">${ch.category || 'General'}</div>
+          <div class="channel-card-sub">${ch.category} ${ch.country ? '• ' + ch.country : ''}</div>
         </div>
+        ${isFav ? '<div class="channel-fav-badge">★</div>' : ''}
+        ${currentChannel && ch.num === currentChannel.num ? '<div class="channel-now-playing-icon">▶ ON AIR</div>' : ''}
       `;
 
       item.addEventListener('click', () => {
@@ -571,6 +486,17 @@ class IPTVApp {
 
       container.appendChild(item);
     });
+
+    if (list.length > maxRender) {
+      const moreInfo = document.createElement('div');
+      moreInfo.style.padding = "20px";
+      moreInfo.style.textAlign = "center";
+      moreInfo.style.color = "#888";
+      moreInfo.textContent = `+ ${list.length - maxRender} more channels. Use search to find them.`;
+      container.appendChild(moreInfo);
+    }
+
+    this.highlightCurrentChannelInList();
   }
 
   highlightCurrentChannelInList() {
@@ -585,10 +511,81 @@ class IPTVApp {
     });
   }
 
-  // --- Settings ---
+  navigateGuide(direction) {
+    if (this.guideFocusArea === 'categories') {
+      const tabs = document.querySelectorAll('.category-tab');
+      if (direction === 'up') {
+        this.focusedCategoryIndex = Math.max(0, this.focusedCategoryIndex - 1);
+      } else if (direction === 'down') {
+        this.focusedCategoryIndex = Math.min(tabs.length - 1, this.focusedCategoryIndex + 1);
+      } else if (direction === 'right') {
+        this.guideFocusArea = 'channels';
+      }
+    } else {
+      // Guide focus area: channels
+      const cards = document.querySelectorAll('.channel-card');
+      if (cards.length === 0) return;
+
+      if (direction === 'up') {
+        this.focusedChannelIndex = Math.max(0, this.focusedChannelIndex - 1);
+      } else if (direction === 'down') {
+        this.focusedChannelIndex = Math.min(cards.length - 1, this.focusedChannelIndex + 1);
+      } else if (direction === 'left') {
+        this.guideFocusArea = 'categories';
+      }
+    }
+
+    this.highlightGuideItem();
+  }
+
+  highlightGuideItem() {
+    // Remove focus from all
+    document.querySelectorAll('.focused').forEach(el => el.classList.remove('focused'));
+
+    if (this.guideFocusArea === 'categories') {
+      const tabs = document.querySelectorAll('.category-tab');
+      const target = tabs[this.focusedCategoryIndex];
+      if (target) {
+        target.classList.add('focused');
+        target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    } else {
+      const cards = document.querySelectorAll('.channel-card');
+      const target = cards[this.focusedChannelIndex];
+      if (target) {
+        target.classList.add('focused');
+        target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
+
+  selectFocusedGuideItem() {
+    if (this.guideFocusArea === 'categories') {
+      const tabs = document.querySelectorAll('.category-tab');
+      const target = tabs[this.focusedCategoryIndex];
+      if (target) {
+        target.click();
+        this.guideFocusArea = 'channels';
+        this.focusedChannelIndex = 0;
+        this.highlightGuideItem();
+      }
+    } else {
+      this.selectChannelByIndex(this.focusedChannelIndex);
+    }
+  }
+
+  // --- Settings & Playlist Modal ---
+
+  isSettingsOpen() {
+    return this.settingsOpen;
+  }
+
   openSettings() {
     this.settingsOpen = true;
-    document.getElementById('settings-modal').classList.remove('hidden');
+    const modal = document.getElementById('settings-modal');
+    modal.classList.remove('hidden');
+
+    // Populate presets dropdown
     const select = document.getElementById('playlist-preset-select');
     if (select) {
       select.innerHTML = '';
@@ -596,22 +593,28 @@ class IPTVApp {
         const opt = document.createElement('option');
         opt.value = preset.id;
         opt.textContent = preset.name;
-        if (preset.id === this.channelManager.currentPlaylistId) opt.selected = true;
+        if (preset.id === this.channelManager.currentPlaylistId) {
+          opt.selected = true;
+        }
         select.appendChild(opt);
       });
     }
-    this.updateGlobalBackButton();
+
+    const customInput = document.getElementById('custom-m3u-url');
+    if (customInput) customInput.value = this.channelManager.customUrl || '';
   }
 
   closeSettings() {
     this.settingsOpen = false;
     document.getElementById('settings-modal').classList.add('hidden');
-    this.updateGlobalBackButton();
   }
 
   toggleSettings() {
-    if (this.settingsOpen) this.closeSettings();
-    else this.openSettings();
+    if (this.settingsOpen) {
+      this.closeSettings();
+    } else {
+      this.openSettings();
+    }
   }
 
   async saveCustomPlaylist() {
@@ -626,33 +629,12 @@ class IPTVApp {
     await this.channelManager.loadPlaylist(presetId, customUrl);
     this.renderCategories();
     this.renderChannelList();
-    this.renderAllChannelCarousels();
 
+    const first = this.channelManager.getCurrentChannel();
+    if (first) {
+      this.playChannel(first);
+    }
     this.showToast(`Loaded ${this.channelManager.channels.length} channels`);
-  }
-
-  updateGlobalBackButton() {
-    const btn = document.getElementById('btn-global-back');
-    if (!btn) return;
-    if (this.playerModalOpen || this.guideOpen || this.settingsOpen || this.channelManager.currentCategory !== 'All') {
-      btn.style.display = 'flex';
-    } else {
-      btn.style.display = 'none';
-    }
-  }
-
-  handleGlobalBack() {
-    if (this.playerModalOpen) {
-      this.closePlayerModal();
-    } else if (this.settingsOpen) {
-      this.closeSettings();
-    } else if (this.guideOpen) {
-      this.closeGuide();
-    } else if (this.channelManager.currentCategory !== 'All') {
-      // Simulate clicking the Home tab
-      const allBtn = document.querySelector('.nav-item[data-category="All"]');
-      if (allBtn) allBtn.click();
-    }
   }
 }
 

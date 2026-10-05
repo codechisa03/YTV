@@ -1,8 +1,6 @@
 {
   "name": "iptv",
   "scripts": {
-    "build": "node -e \"console.log('Building YTV Static Site...')\"",
-    "start": "node webos-app/dev-server.js",
     "act:check": "gh act pull_request -W .github/workflows/check.yml",
     "act:format": "gh act workflow_dispatch -W .github/workflows/format.yml",
     "act:update": "gh act workflow_dispatch -W .github/workflows/update.yml",

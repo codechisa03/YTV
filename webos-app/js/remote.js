@@ -99,31 +99,36 @@ class RemoteHandler {
 
     // OK / Enter button
     if (this.isMatch(code, this.KEY_CODES.ENTER) || key === 'Enter') {
-      if (this.onEnter()) e.preventDefault();
+      e.preventDefault();
+      this.onEnter();
       return;
     }
 
     // D-Pad Up
     if (this.isMatch(code, this.KEY_CODES.UP) || key === 'ArrowUp') {
-      if (this.onUp()) e.preventDefault();
+      e.preventDefault();
+      this.onUp();
       return;
     }
 
     // D-Pad Down
     if (this.isMatch(code, this.KEY_CODES.DOWN) || key === 'ArrowDown') {
-      if (this.onDown()) e.preventDefault();
+      e.preventDefault();
+      this.onDown();
       return;
     }
 
     // D-Pad Left
     if (this.isMatch(code, this.KEY_CODES.LEFT) || key === 'ArrowLeft') {
-      if (this.onLeft()) e.preventDefault();
+      e.preventDefault();
+      this.onLeft();
       return;
     }
 
     // D-Pad Right
     if (this.isMatch(code, this.KEY_CODES.RIGHT) || key === 'ArrowRight') {
-      if (this.onRight()) e.preventDefault();
+      e.preventDefault();
+      this.onRight();
       return;
     }
 
@@ -225,85 +230,59 @@ class RemoteHandler {
     if (this.numberBuffer) {
       if (this.numberTimer) clearTimeout(this.numberTimer);
       this.commitNumberInput();
-      return true;
+      return;
     }
 
-    if (this.app.isGuideOpen && this.app.isGuideOpen()) {
+    if (this.app.isGuideOpen()) {
       this.app.selectFocusedGuideItem();
-      return true;
-    } else if (this.app.isSettingsOpen && this.app.isSettingsOpen()) { /* check if method exists */
+    } else if (this.app.isSettingsOpen()) {
       this.app.confirmSettings();
-      return true;
-    } else if (this.app.playerModalOpen) {
-      // In fullscreen player, Enter can toggle play/pause or OSD, let's just toggle OSD
-      this.app.toggleInfoOSD();
-      return true;
+    } else {
+      // Toggle Channel Guide
+      this.app.openGuide();
     }
-    
-    // We are on the main screen. If the focus is on a button or link, let native click handle it!
-    // But if focus is just on the body, open guide.
-    if (document.activeElement && (document.activeElement.tagName === 'BUTTON' || document.activeElement.tagName === 'A' || document.activeElement.tagName === 'INPUT')) {
-      return false; // Let browser trigger the click
-    }
-    
-    // Toggle Channel Guide if nothing is focused
-    this.app.openGuide();
-    return true;
   }
 
   onUp() {
     if (this.app.isGuideOpen()) {
       this.app.navigateGuide('up');
-      return true;
     } else if (this.app.isSettingsOpen()) {
       this.app.navigateSettings('up');
-      return true;
-    } else if (this.app.playerModalOpen) {
+    } else {
+      // In full-screen, Up switches to previous channel or opens guide
       this.app.prevChannel();
-      return true;
     }
-    return false; // Let native spatial navigation handle focus
   }
 
   onDown() {
     if (this.app.isGuideOpen()) {
       this.app.navigateGuide('down');
-      return true;
     } else if (this.app.isSettingsOpen()) {
       this.app.navigateSettings('down');
-      return true;
-    } else if (this.app.playerModalOpen) {
+    } else {
+      // In full-screen, Down switches to next channel
       this.app.nextChannel();
-      return true;
     }
-    return false;
   }
 
   onLeft() {
     if (this.app.isGuideOpen()) {
       this.app.navigateGuide('left');
-      return true;
     } else if (this.app.isSettingsOpen()) {
       this.app.navigateSettings('left');
-      return true;
-    } else if (this.app.playerModalOpen) {
-      // Maybe volume down or seek in future, but for now just consume it
-      return true;
+    } else {
+      this.app.cycleCategory(-1);
     }
-    return false;
   }
 
   onRight() {
     if (this.app.isGuideOpen()) {
       this.app.navigateGuide('right');
-      return true;
     } else if (this.app.isSettingsOpen()) {
       this.app.navigateSettings('right');
-      return true;
-    } else if (this.app.playerModalOpen) {
-      return true;
+    } else {
+      this.app.cycleCategory(1);
     }
-    return false;
   }
 
   onBack() {
@@ -313,27 +292,13 @@ class RemoteHandler {
       return;
     }
 
-    if (this.app.isSettingsOpen && this.app.isSettingsOpen()) { /* fallback if method missing, wait, I can just use exact bool flag like others */ }
-    
-    // In app.js we have settingsOpen, guideOpen, playerModalOpen properties.
-    if (this.app.settingsOpen) {
+    if (this.app.isSettingsOpen()) {
       this.app.closeSettings();
       return;
     }
 
-    if (this.app.guideOpen) {
+    if (this.app.isGuideOpen()) {
       this.app.closeGuide();
-      return;
-    }
-
-    if (this.app.playerModalOpen) {
-      this.app.closePlayerModal();
-      return;
-    }
-
-    // if not on default category (All), return home
-    if (this.app.channelManager && this.app.channelManager.currentCategory !== 'All') {
-      this.app.handleGlobalBack(); // returns to home easily
       return;
     }
 
