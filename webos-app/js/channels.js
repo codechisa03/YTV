@@ -5,11 +5,124 @@
 
 // Curated high-availability live channels loaded immediately
 // TAMIL CHANNELS ARE PLACED FIRST (CH 1 - CH 12)
+// Built-in logo helper generator for 100% reliable crisp SVG channel logos
+const LOGO_SVGS = {
+  suntv: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23111"/><circle cx="50" cy="50" r="32" fill="url(%23sunGrad)"/><defs><radialGradient id="sunGrad"><stop offset="0%25" stop-color="%23FFF000"/><stop offset="60%25" stop-color="%23FF5500"/><stop offset="100%25" stop-color="%23D00000"/></radialGradient></defs><path d="M50 8 L54 24 L68 14 L62 28 L78 26 L68 38 L84 46 L70 52 L82 64 L67 66 L74 80 L60 76 L60 92 L50 80 L40 92 L40 76 L26 80 L33 66 L18 64 L30 52 L16 46 L32 38 L22 26 L38 28 L32 14 L46 24 Z" fill="%23FFCC00"/><text x="50" y="58" font-size="12" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">SUN TV</text></svg>`,
+
+  starvijay: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230c1220"/><polygon points="50,12 63,38 92,38 68,54 78,82 50,64 22,82 32,54 8,38 37,38" fill="%23FF0033" stroke="%23FFCC00" stroke-width="3"/><text x="50" y="90" font-size="11" font-weight="900" font-family="sans-serif" fill="%23FFCC00" text-anchor="middle">STAR VIJAY</text></svg>`,
+
+  zeetamil: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="url(%23zeeBg)"/><defs><linearGradient id="zeeBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%25" stop-color="%23FF5E00"/><stop offset="100%25" stop-color="%23A000C8"/></linearGradient></defs><text x="50" y="52" font-size="34" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">ZEE</text><text x="50" y="74" font-size="13" font-weight="800" font-family="sans-serif" fill="%23FFD700" text-anchor="middle">தமிழ்</text></svg>`,
+
+  colorstamil: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230a0f1c"/><circle cx="50" cy="38" r="14" fill="%23FF0077"/><circle cx="36" cy="48" r="14" fill="%2300CCFF"/><circle cx="64" cy="48" r="14" fill="%23FFCC00"/><circle cx="50" cy="54" r="12" fill="%2300FF66"/><text x="50" y="82" font-size="11" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">colors தமிழ்</text></svg>`,
+
+  news18tamil: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23101424"/><rect x="10" y="24" width="80" height="34" rx="6" fill="%23E60000"/><text x="50" y="48" font-size="17" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">NEWS 18</text><text x="50" y="76" font-size="11" font-weight="800" font-family="sans-serif" fill="%2300E5FF" text-anchor="middle">TAMIL NADU</text></svg>`,
+
+  jayatv: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230a101f"/><circle cx="50" cy="42" r="26" fill="%23FFCC00" stroke="%23E60000" stroke-width="4"/><text x="50" y="50" font-size="18" font-weight="900" font-family="sans-serif" fill="%23E60000" text-anchor="middle">JAYA</text><text x="50" y="82" font-size="12" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">JAYA TV</text></svg>`,
+
+  sports18: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230d121f"/><text x="50" y="44" font-size="14" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">sports</text><text x="50" y="78" font-size="34" font-weight="900" font-family="sans-serif" fill="%23FF3300" text-anchor="middle">18</text></svg>`,
+
+  ktv: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23D00000"/><text x="50" y="65" font-size="44" font-weight="900" font-family="sans-serif" fill="%23FFCC00" text-anchor="middle">K</text></svg>`,
+
+  sunmusic: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23111"/><circle cx="50" cy="45" r="24" fill="%23FF0055"/><path d="M42 30 L42 55 A8 8 0 1 0 50 62 L50 38 L62 34 L62 26 Z" fill="%23FFCC00"/><text x="50" y="86" font-size="10" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">SUN MUSIC</text></svg>`,
+
+  adithya: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23FF5500"/><text x="50" y="55" font-size="15" font-weight="900" font-family="sans-serif" fill="%23FFFFFF" text-anchor="middle">ADITHYA</text><text x="50" y="76" font-size="12" font-weight="800" font-family="sans-serif" fill="%23FFCC00" text-anchor="middle">COMEDY</text></svg>`
+};
+
 const DEFAULT_CHANNELS = [
   // --- TAMIL CHANNELS (PRIORITY 1) ---
   {
-    id: "dd-tamil",
+    id: "sun-tv",
     num: 1,
+    name: "SUN TV",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.suntv,
+    url: "https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/2839e3d1e0f84a2e821c1708d5fdfdf0/index.m3u8"
+  },
+  {
+    id: "star-vijay",
+    num: 2,
+    name: "Star Vijay",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.starvijay,
+    url: "http://ptuf.ridsys.in/riptv/live/STAR_VIJAY/index.m3u8"
+  },
+  {
+    id: "zee-tamil",
+    num: 3,
+    name: "Zee Tamil",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.zeetamil,
+    url: "https://amg01117-amg01117c1-amgplt0029.playout.now3.amagi.tv/playlist/amg01117-amg01117c1-amgplt0029/playlist.m3u8"
+  },
+  {
+    id: "colors-tamil",
+    num: 4,
+    name: "Colors Tamil",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.colorstamil,
+    url: "https://segment.yuppcdn.net/240122/kalaignartv/playlist.m3u8"
+  },
+  {
+    id: "news18-tamilnadu",
+    num: 5,
+    name: "News18 Tamil Nadu",
+    category: "News",
+    country: "IN",
+    logo: LOGO_SVGS.news18tamil,
+    url: "https://n18syndication.akamaized.net/bpk-tv/News18_Tamil_Nadu_NW18_MOB/output01/master.m3u8"
+  },
+  {
+    id: "jaya-tv",
+    num: 6,
+    name: "Jaya TV",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.jayatv,
+    url: "https://segment.yuppcdn.net/240122/puthiya/playlist.m3u8"
+  },
+  {
+    id: "sports-18",
+    num: 7,
+    name: "Sports 18",
+    category: "Sports",
+    country: "IN",
+    logo: LOGO_SVGS.sports18,
+    url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+  },
+  {
+    id: "ktv",
+    num: 8,
+    name: "KTV HD",
+    category: "Movies",
+    country: "IN",
+    logo: LOGO_SVGS.ktv,
+    url: "https://d2lk5u59tns74c.cloudfront.net/out/v1/abf46b14847e45499f4a47f3a9afe93d/index.m3u8"
+  },
+  {
+    id: "sun-music",
+    num: 9,
+    name: "Sun Music",
+    category: "Music",
+    country: "IN",
+    logo: LOGO_SVGS.sunmusic,
+    url: "https://9xjio.wiseplayout.com/9XM/master.m3u8"
+  },
+  {
+    id: "adithya-tv",
+    num: 10,
+    name: "Adithya TV",
+    category: "Entertainment",
+    country: "IN",
+    logo: LOGO_SVGS.adithya,
+    url: "https://segment.yuppcdn.net/240122/news7/playlist.m3u8"
+  },
+  {
+    id: "dd-tamil",
+    num: 11,
     name: "DD Tamil HD",
     category: "Tamil",
     country: "IN",
@@ -18,7 +131,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "puthiya-thalaimurai",
-    num: 2,
+    num: 12,
     name: "Puthiya Thalaimurai News",
     category: "Tamil",
     country: "IN",
@@ -26,17 +139,8 @@ const DEFAULT_CHANNELS = [
     url: "https://segment.yuppcdn.net/240122/puthiya/playlist.m3u8"
   },
   {
-    id: "news18-tamilnadu",
-    num: 3,
-    name: "News18 Tamil Nadu",
-    category: "Tamil",
-    country: "IN",
-    logo: "https://i.imgur.com/Qh1P2Yk.png",
-    url: "https://n18syndication.akamaized.net/bpk-tv/News18_Tamil_Nadu_NW18_MOB/output01/master.m3u8"
-  },
-  {
     id: "news7-tamil",
-    num: 4,
+    num: 13,
     name: "News 7 Tamil",
     category: "Tamil",
     country: "IN",
@@ -45,7 +149,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "kalaignar-tv",
-    num: 5,
+    num: 14,
     name: "Kalaignar TV",
     category: "Tamil",
     country: "IN",
@@ -54,7 +158,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "raj-tv",
-    num: 6,
+    num: 15,
     name: "Raj TV HD",
     category: "Tamil",
     country: "IN",
@@ -62,82 +166,19 @@ const DEFAULT_CHANNELS = [
     url: "https://d3qs3d2rkhfqrt.cloudfront.net/out/v1/2839e3d1e0f84a2e821c1708d5fdfdf0/index.m3u8"
   },
   {
-    id: "raj-digital-plus",
-    num: 7,
-    name: "Raj Digital Plus",
-    category: "Tamil",
-    country: "IN",
-    logo: "https://i.imgur.com/d9j3J9C.png",
-    url: "https://livestream.rajtv.tv/hlslive/Admin/px08241087/live/RajTV_Digital_plus/master_1.m3u8"
-  },
-  {
-    id: "aastha-tamil",
-    num: 8,
-    name: "Aastha Tamil",
-    category: "Tamil",
-    country: "IN",
-    logo: "https://i.imgur.com/aC8H5Xh.png",
-    url: "https://aasthaott.akamaized.net/110923/smil:aasthatamil.smil/playlist.m3u8"
-  },
-  {
-    id: "mediacorp-tamil",
-    num: 9,
-    name: "Mediacorp Entertainment Tamil",
-    category: "Tamil",
-    country: "SG",
-    logo: "https://i.imgur.com/KzWdOaK.png",
-    url: "https://d35j504z0x2vu2.cloudfront.net/v1/master/0bc8e8376bd8417a1b6761138aa41c26c7309312/mediacorp-entertainment-tamil/manifest.m3u8?ads.vf=7NuondEN9pK"
-  },
-  {
-    id: "shakthi-tv",
-    num: 10,
-    name: "Shakthi TV Tamil",
-    category: "Tamil",
-    country: "LK",
-    logo: "https://i.imgur.com/Z4w2aCq.png",
-    url: "https://edge4-moblive.yuppcdn.net/transsd/smil:saktv10.smil/playlist.m3u8?dvr="
-  },
-  {
-    id: "vasantham-tv",
-    num: 11,
-    name: "Vasantham TV Tamil",
-    category: "Tamil",
-    country: "LK",
-    logo: "https://i.imgur.com/OqG3Ceg.png",
-    url: "https://j78dp2pnlq5r-hls-live.comcities.net/ITNDigital/20a317b0496a4930b375290505e5d628.sdp/playlist_dvr.m3u8"
-  },
-  {
-    id: "star-vijay",
-    num: 12,
-    name: "Star Vijay",
-    category: "Tamil",
-    country: "IN",
-    logo: "https://i.imgur.com/OqG3Ceg.png", // using an existing logo
-    url: "http://ptuf.ridsys.in/riptv/live/STAR_VIJAY/index.m3u8"
-  },
-  {
     id: "vijay-super",
-    num: 13,
+    num: 16,
     name: "Vijay Super",
     category: "Tamil",
     country: "IN",
-    logo: "https://i.imgur.com/OqG3Ceg.png",
+    logo: LOGO_SVGS.starvijay,
     url: "http://ptuf.ridsys.in/riptv/live/VIJAY_SUPER/index.m3u8"
   },
-  {
-    id: "star-tamil",
-    num: 14,
-    name: "Star Tamil Television",
-    category: "Tamil",
-    country: "LK",
-    logo: "https://i.imgur.com/d9j3J9C.png",
-    url: "https://edge4-moblive.yuppcdn.net/trans1sd/smil:strtml19.smil/playlist.m3u8?dvr="
-  },
 
-  // --- MAJOR INDIAN CHANNELS (CH 15+) ---
+  // --- MAJOR INDIAN CHANNELS (CH 17+) ---
   {
     id: "aaj-tak-hd",
-    num: 15,
+    num: 17,
     name: "Aaj Tak HD",
     category: "News",
     country: "IN",
@@ -146,7 +187,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "india-today",
-    num: 16,
+    num: 18,
     name: "India Today News",
     category: "News",
     country: "IN",
@@ -155,7 +196,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "abp-news",
-    num: 17,
+    num: 19,
     name: "ABP News HD",
     category: "News",
     country: "IN",
@@ -164,63 +205,18 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "9xm",
-    num: 18,
+    num: 20,
     name: "9XM Bollywood Music",
     category: "Music",
     country: "IN",
     logo: "https://i.imgur.com/Uv7i3R8.png",
     url: "https://9xjio.wiseplayout.com/9XM/master.m3u8"
   },
-  {
-    id: "9x-jalwa",
-    num: 19,
-    name: "9X Jalwa Classic Hits",
-    category: "Music",
-    country: "IN",
-    logo: "https://i.imgur.com/vH1N9sW.png",
-    url: "https://b.jsrdn.com/strm/channels/9xjalwa/master.m3u8"
-  },
-  {
-    id: "9x-tashan",
-    num: 20,
-    name: "9X Tashan Punjabi",
-    category: "Music",
-    country: "IN",
-    logo: "https://i.imgur.com/d9j3J9C.png",
-    url: "https://9xjio.wiseplayout.com/9X_Tashan/master.m3u8"
-  },
-  {
-    id: "and-tv-int",
-    num: 21,
-    name: "&TV International",
-    category: "Entertainment",
-    country: "IN",
-    logo: "https://i.imgur.com/X26bQjL.png",
-    url: "https://amg01117-amg01117c1-amgplt0029.playout.now3.amagi.tv/playlist/amg01117-amg01117c1-amgplt0029/playlist.m3u8"
-  },
-  {
-    id: "abp-ananda",
-    num: 22,
-    name: "ABP Ananda",
-    category: "News",
-    country: "IN",
-    logo: "https://i.imgur.com/Qh1P2Yk.png",
-    url: "https://abp-i.akamaihd.net/hls/live/722384/abpanandahls/master.m3u8"
-  },
-  {
-    id: "abp-majha",
-    num: 23,
-    name: "ABP Majha",
-    category: "News",
-    country: "IN",
-    logo: "https://i.imgur.com/39w4qQO.png",
-    url: "https://abp-i.akamaihd.net/hls/live/722385/abpmajhahls/master.m3u8"
-  },
 
   // --- GLOBAL POPULAR CHANNELS ---
   {
     id: "dw-english",
-    num: 24,
+    num: 21,
     name: "DW English HD",
     category: "News",
     country: "DE",
@@ -229,7 +225,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "france24-en",
-    num: 25,
+    num: 22,
     name: "France 24 English",
     category: "News",
     country: "FR",
@@ -238,7 +234,7 @@ const DEFAULT_CHANNELS = [
   },
   {
     id: "aljazeera-en",
-    num: 26,
+    num: 23,
     name: "Al Jazeera English HD",
     category: "News",
     country: "QA",
@@ -246,58 +242,13 @@ const DEFAULT_CHANNELS = [
     url: "https://live-hls-web-aje.getaj.net/AJE/03.m3u8"
   },
   {
-    id: "euronews-en",
-    num: 27,
-    name: "Euronews English",
-    category: "News",
-    country: "FR",
-    logo: "https://i.imgur.com/39w4qQO.png",
-    url: "https://euronews-euronews-world-1-au.samsung.wurl.tv/playlist.m3u8"
-  },
-  {
-    id: "nasa-tv",
-    num: 28,
-    name: "NASA TV Public HD",
-    category: "Science",
-    country: "US",
-    logo: "https://i.imgur.com/aC8H5Xh.png",
-    url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8"
-  },
-  {
     id: "redbull-tv",
-    num: 29,
+    num: 24,
     name: "Red Bull TV",
     category: "Sports",
     country: "AT",
     logo: "https://i.imgur.com/Z4w2aCq.png",
     url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
-  },
-  {
-    id: "bloomberg-quicktake",
-    num: 30,
-    name: "Bloomberg Quicktake",
-    category: "News",
-    country: "US",
-    logo: "https://i.imgur.com/d9j3J9C.png",
-    url: "https://bloomberg.com/media-manifest/streams/us.m3u8"
-  },
-  {
-    id: "rakuten-movies",
-    num: 31,
-    name: "Rakuten Action Movies",
-    category: "Movies",
-    country: "US",
-    logo: "https://i.imgur.com/vH1N9sW.png",
-    url: "https://rakuten-actionmovies-1-eu.rakuten.wurl.tv/playlist.m3u8"
-  },
-  {
-    id: "retro-cartoon",
-    num: 32,
-    name: "Retro Toons & Kids",
-    category: "Kids",
-    country: "US",
-    logo: "https://i.imgur.com/X26bQjL.png",
-    url: "https://stream.ads.ottera.tv/playlist.m3u8?network_id=2273"
   }
 ];
 

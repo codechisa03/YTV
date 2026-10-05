@@ -2,39 +2,189 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- webOS 1080p Full HD Canvas -->
-  <meta name="viewport" content="width=1920, height=1080, user-scalable=no, initial-scale=1.0">
-  <title>IPTV Live TV - webOS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>YTV — All Entertainment. Always With You.</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="app-root">
 
-    <!-- Top Header Bar (Quick Access / Air Mouse) -->
+    <!-- Top Navigation Bar -->
     <header id="header-bar">
-      <div class="tv-brand">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>
-        </svg>
-        IPTV LIVE
+      <div class="header-left">
+        <a href="#" class="ytv-brand">
+          <div class="brand-logo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </div>
+          <div class="brand-text-wrap">
+            <div class="brand-title">YTV <span class="brand-sub">TV</span></div>
+            <div class="brand-tagline">ALL ENTERTAINMENT. ALWAYS WITH YOU.</div>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="main-nav">
+          <button class="nav-item active" data-category="All">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            Home
+          </button>
+          <button class="nav-item" data-category="Tamil">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+            Tamil Channels
+          </button>
+          <button class="nav-item" data-category="Entertainment">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+            Entertainment
+          </button>
+          <button class="nav-item" data-category="News">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            News
+          </button>
+          <button class="nav-item" data-category="Sports">
+            <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.85.14-1.67.39-2.44l4.61 4.61V16c0 1.1.9 2 2 2h2v1.93c-.32.05-.66.07-1 .07z"/></svg>
+            Sports
+          </button>
+        </nav>
       </div>
-      <button id="btn-guide-toggle" class="header-btn" title="Open Channel Guide (Enter/OK)">
-        <span>☰ Channels</span>
-      </button>
-      <button id="btn-settings-toggle" class="header-btn" title="Settings & Playlists (Blue button)">
-        <span>⚙ Settings</span>
-      </button>
-      <button id="btn-fullscreen-toggle" class="header-btn" title="Toggle Fullscreen">
-        <span>⛶ Fullscreen</span>
-      </button>
-      <button id="btn-virtual-remote-toggle" class="header-btn" title="Toggle On-Screen Remote">
-        <span>🎮 Remote</span>
-      </button>
+
+      <div class="header-right">
+        <!-- Global Search Input Bar -->
+        <div class="header-search-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
+          <input type="text" id="global-search-input" placeholder="Search TV channels by name or number..." />
+        </div>
+
+        <!-- Quick Utility Action Buttons -->
+        <button id="btn-guide-toggle" class="header-icon-btn" title="Open TV Channel Guide">
+          <span>☰</span>
+        </button>
+        <button id="btn-settings-toggle" class="header-icon-btn" title="Playlist & Stream Settings">
+          <span>⚙</span>
+        </button>
+        <button id="btn-fullscreen-toggle" class="header-icon-btn" title="Toggle Fullscreen">
+          <span>⛶</span>
+        </button>
+      </div>
     </header>
 
-    <!-- Fullscreen Video Surface -->
-    <div id="video-container">
+    <!-- Main Scrollable Content Canvas -->
+    <main id="main-content">
+
+      <!-- Hero Feature Banner -->
+      <section class="hero-banner-section" id="hero-section">
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="sparkle-icon">✨</span> LIVE TAMIL STREAMING
+          </div>
+          <h1 class="hero-title" id="hero-title-text">SUN TV LIVE</h1>
+          <div class="hero-meta">
+            <span class="meta-item year">CH 01</span>
+            <span class="meta-dot">•</span>
+            <span class="meta-item badge-4k">1080p FHD</span>
+            <span class="meta-dot">•</span>
+            <span class="meta-item">Entertainment</span>
+          </div>
+          <p class="hero-description" id="hero-desc-text">
+            Watch live blockbuster Tamil hit movies, exclusive daily serials, and live show telecasts uninterrupted on Sun TV.
+          </p>
+          <div class="hero-actions">
+            <button class="btn-hero-primary" id="btn-hero-play">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              Watch Live Now
+            </button>
+            <button class="btn-hero-secondary" id="btn-hero-guide">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+              Open Full TV Guide
+            </button>
+          </div>
+        </div>
+
+        <!-- Hero Navigation & Pagination Indicators -->
+        <button class="hero-carousel-arrow prev" id="hero-prev">‹</button>
+        <button class="hero-carousel-arrow next" id="hero-next">›</button>
+        <div class="hero-pagination-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </section>
+
+      <!-- Section 1: Live Tamil Channels Carousel -->
+      <section class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="blue-line"></span>
+            Live Tamil Channels
+          </h2>
+          <a href="#" class="view-all-link" id="link-view-all-tamil">View All →</a>
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="cards-grid live-now-grid" id="tamil-channels-container">
+            <!-- Injected dynamically via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Entertainment Channels Carousel -->
+      <section class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="blue-line"></span>
+            Entertainment & Serials
+          </h2>
+          <a href="#" class="view-all-link" id="link-view-all-entertainment">View All →</a>
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="cards-grid live-now-grid" id="entertainment-channels-container">
+            <!-- Injected dynamically via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: News & Sports Channels Carousel -->
+      <section class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="blue-line"></span>
+            News & Sports Channels
+          </h2>
+          <a href="#" class="view-all-link" id="link-view-all-news">View All →</a>
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="cards-grid live-now-grid" id="news-sports-channels-container">
+            <!-- Injected dynamically via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: All TV Channels Grid -->
+      <section class="content-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="blue-line"></span>
+            All Live TV Channels
+          </h2>
+        </div>
+        <div class="all-channels-grid" id="all-channels-grid-container">
+          <!-- Injected dynamically via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Embedded / Fullscreen Live Stream Player Surface -->
+    <div id="video-container" class="hidden">
       <video id="video-player" playsinline autoplay></video>
+      <button class="close-player-btn" id="btn-close-player" title="Close Player (Esc)">✕</button>
     </div>
 
     <!-- Stream Error / Offline Overlay -->
@@ -47,13 +197,13 @@
       </div>
     </div>
 
-    <!-- Quick Number Dialing Overlay (Top-Right) -->
+    <!-- Quick Number Dialing Overlay -->
     <div id="number-dial-osd" class="hidden">
       <div class="dial-label">CH</div>
       <div id="number-dial-digits">01</div>
     </div>
 
-    <!-- Channel Info Banner (Bottom Floating Card OSD) -->
+    <!-- Channel Info Banner (Bottom Floating OSD) -->
     <div id="channel-osd" class="hidden">
       <div class="osd-left">
         <div id="osd-channel-num" class="osd-channel-num-box">01</div>
@@ -62,11 +212,11 @@
         </div>
         <div class="osd-info-text">
           <div class="osd-title-row">
-            <span id="osd-channel-name">DW English HD</span>
+            <span id="osd-channel-name">SUN TV</span>
             <span id="osd-fav-icon" style="display: none;">★</span>
           </div>
           <div class="osd-meta-row">
-            <span id="osd-channel-category" class="osd-badge">News</span>
+            <span id="osd-channel-category" class="osd-badge">Entertainment</span>
             <span id="osd-channel-res" class="osd-badge res">1080p FHD</span>
             <span id="stream-status-badge" class="status-badge playing">PLAYING</span>
           </div>
@@ -107,14 +257,6 @@
       <div class="guide-channels-container">
         <div id="guide-channels-list"></div>
       </div>
-
-      <!-- Remote Color Legend Footer -->
-      <div class="guide-footer-legend">
-        <div class="legend-item"><span class="color-dot red"></span> Fav</div>
-        <div class="legend-item"><span class="color-dot green"></span> Category</div>
-        <div class="legend-item"><span class="color-dot yellow"></span> Aspect</div>
-        <div class="legend-item"><span class="color-dot blue"></span> Settings</div>
-      </div>
     </aside>
 
     <!-- Settings & Custom Playlist Modal -->
@@ -140,72 +282,33 @@
       </div>
     </div>
 
-    <!-- On-Screen Virtual Remote Control (For PC Browser Development & Testing) -->
-    <div id="virtual-remote-container">
-      <div class="vrem-header">
-        <span class="vrem-title">LG TV REMOTE</span>
-        <button class="vrem-power-btn" title="Power">⏻</button>
-      </div>
-
-      <!-- Channel Rocker & Volume Rocker -->
-      <div class="vrem-rockers-row">
-        <div class="vrem-rocker">
-          <button id="vrem-vol-up">VOL +</button>
-          <div class="vrem-rocker-label">VOL</div>
-          <button id="vrem-vol-down">VOL -</button>
-        </div>
-        <div class="vrem-rocker">
-          <button id="vrem-ch-up">CH ∧</button>
-          <div class="vrem-rocker-label">CH</div>
-          <button id="vrem-ch-down">CH ∨</button>
-        </div>
-      </div>
-
-      <!-- D-Pad -->
-      <div class="vrem-dpad-wrap">
-        <button id="vrem-up" class="vrem-dpad-btn up">▲</button>
-        <button id="vrem-down" class="vrem-dpad-btn down">▼</button>
-        <button id="vrem-left" class="vrem-dpad-btn left">◀</button>
-        <button id="vrem-right" class="vrem-dpad-btn right">▶</button>
-        <button id="vrem-ok" class="vrem-dpad-btn ok">OK</button>
-      </div>
-
-      <!-- Back / Guide / Info / Fullscreen Buttons -->
-      <div class="vrem-util-row">
-        <button id="vrem-back" class="vrem-btn-small">BACK</button>
-        <button id="vrem-guide" class="vrem-btn-small">GUIDE</button>
-        <button id="vrem-info" class="vrem-btn-small">INFO</button>
-        <button id="vrem-fullscreen" class="vrem-btn-small">FULL</button>
-      </div>
-
-      <!-- 0-9 Keypad -->
-      <div class="vrem-numpad-grid">
-        <button id="vrem-1" class="vrem-num-btn">1</button>
-        <button id="vrem-2" class="vrem-num-btn">2</button>
-        <button id="vrem-3" class="vrem-num-btn">3</button>
-        <button id="vrem-4" class="vrem-num-btn">4</button>
-        <button id="vrem-5" class="vrem-num-btn">5</button>
-        <button id="vrem-6" class="vrem-num-btn">6</button>
-        <button id="vrem-7" class="vrem-num-btn">7</button>
-        <button id="vrem-8" class="vrem-num-btn">8</button>
-        <button id="vrem-9" class="vrem-num-btn">9</button>
-        <button id="vrem-play" class="vrem-num-btn">▶/❚❚</button>
-        <button id="vrem-0" class="vrem-num-btn">0</button>
-        <button id="vrem-enter" class="vrem-num-btn">↵</button>
-      </div>
-
-      <!-- Color Keys -->
-      <div class="vrem-color-row">
-        <button id="vrem-red" class="vrem-color-btn red" title="Red: Favorite">FAV</button>
-        <button id="vrem-green" class="vrem-color-btn green" title="Green: Category">CAT</button>
-        <button id="vrem-yellow" class="vrem-color-btn yellow" title="Yellow: Aspect">ASP</button>
-        <button id="vrem-blue" class="vrem-color-btn blue" title="Blue: Settings">SET</button>
-      </div>
-    </div>
+    <!-- Mobile Navigation Bar (Fixed at bottom for mobile screens) -->
+    <nav id="mobile-bottom-nav">
+      <button class="mob-nav-btn active" data-category="All">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>All Channels</span>
+      </button>
+      <button class="mob-nav-btn" data-category="Tamil">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+        <span>Tamil</span>
+      </button>
+      <button class="mob-nav-btn" data-category="News">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        <span>News</span>
+      </button>
+      <button class="mob-nav-btn" id="btn-mob-guide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        <span>Guide</span>
+      </button>
+      <button class="mob-nav-btn" id="btn-mob-settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
 
   </div>
 
-  <!-- Scripts -->
+  <!-- App Scripts -->
   <script src="js/lib/webos-adapter.js"></script>
   <script src="js/lib/hls.min.js"></script>
   <script src="js/channels.js"></script>
