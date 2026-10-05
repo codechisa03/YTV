@@ -211,6 +211,7 @@ class IPTVApp {
     const card = document.createElement('div');
     card.className = 'live-channel-card';
     card.setAttribute('data-id', ch.id || ch.num);
+    card.setAttribute('tabindex', '0'); // CRITICAL: Makes the card focusable by TV remote D-Pad
 
     card.innerHTML = `
       <div class="card-top-badges">

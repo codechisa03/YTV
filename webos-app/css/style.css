@@ -405,6 +405,11 @@ html, body {
   font-weight: 700;
   box-shadow: 0 4px 14px rgba(59,130,246,0.4);
 }
+.cat-pill:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(34,211,238,0.3);
+}
 .cat-pill:active { transform: scale(0.95); }
 
 /* ============================================================
@@ -474,6 +479,13 @@ html, body {
 }
 .live-channel-card:active {
   transform: scale(0.95);
+  background: var(--bg-card-hover);
+}
+.live-channel-card:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.3);
+  transform: scale(1.05);
   background: var(--bg-card-hover);
 }
 
